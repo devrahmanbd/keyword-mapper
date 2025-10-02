@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import argparse
 import csv
 import gzip
@@ -398,11 +399,19 @@ def write_keyword_csv(filename: str, keyword_to_urls: Dict[str, List[str]]):
                 f.write(f"{keyword};{primary_url}\n")
 
 def write_kw_csv(filename: str, keyword_to_urls: Dict[str, List[str]]):
+    # Reverse mapping: URL to keywords
+    url_to_keywords = defaultdict(list)
+    for keyword, urls in keyword_to_urls.items():
+        for url in urls:
+            url_to_keywords[url].append(keyword)
+
     with open(filename, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["Keyword", "URLs"])
-        for kw, urls in sorted(keyword_to_urls.items(), key=lambda x: x[0].lower()):
-            w.writerow([kw, ", ".join(sorted(set(urls)))])
+        w.writerow(["URL", "Keywords"])
+        for url, keywords in sorted(url_to_keywords.items(), key=lambda x: x[0].lower()):
+            kws = ", ".join(sorted(set(keywords)))
+            w.writerow([url, kws])
+
 
 def write_cannibalization(filename: str, keyword_to_urls: Dict[str, List[str]]) -> int:
     affected = [kw for kw, urls in keyword_to_urls.items() if len(set(urls)) >= 2]
